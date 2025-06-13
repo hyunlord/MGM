@@ -1,1 +1,1 @@
-# gpu_server_manager
+# My GPU Manager
