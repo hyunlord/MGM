@@ -48,7 +48,7 @@ services:
       - MASTER_URL=http://master:8000
       - HTTP_PROXY
       - HTTPS_PROXY
-      - NO_PROXY
+      - NO_PROXY=${NO_PROXY},.internal,master,mlops_master,db,mlops_db
       - NVIDIA_VISIBLE_DEVICES=all
     depends_on:
       - master # master가 실행된 후에 agent_local 실행
