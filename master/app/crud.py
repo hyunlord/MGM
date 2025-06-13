@@ -13,6 +13,7 @@ def update_server_status(db: Session, status: schemas.ServerStatus):
         db.refresh(server)
 
     # 2. 서버의 기본 정보를 업데이트합니다.
+    server.alias = status.alias
     server.ip_address = status.ip_address
     server.cpu_percent = status.cpu_percent
     server.memory_percent = status.memory_percent

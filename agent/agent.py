@@ -70,6 +70,7 @@ def get_status_payload():
     payload = {
         "hostname": get_hostname(),
         "ip_address": get_ip_address(),
+        "alias": os.getenv("AGENT_ALIAS"),
         "cpu_percent": psutil.cpu_percent(interval=1),
         "memory_percent": mem.percent,
         "gpus": get_gpu_info()

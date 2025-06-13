@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 
@@ -15,6 +15,7 @@ class GPUStatus(BaseModel):
 class ServerStatus(BaseModel):
     hostname: str
     ip_address: str
+    alias: Optional[str] = None
     cpu_percent: float
     memory_percent: float
     gpus: List[GPUStatus]
@@ -36,6 +37,7 @@ class ServerInfo(BaseModel):
     id: int
     hostname: str
     ip_address: str
+    alias: Optional[str] = None
     cpu_percent: float
     memory_percent: float
     updated_at: datetime

@@ -9,6 +9,8 @@ class Server(Base):
     id = Column(Integer, primary_key=True, index=True)
     hostname = Column(String, unique=True, index=True)
     ip_address = Column(String)
+    alias = Column(String, unique=True, index=True, nullable=True)
+
     cpu_percent = Column(Float)
     memory_percent = Column(Float)
 

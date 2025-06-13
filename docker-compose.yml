@@ -45,6 +45,7 @@ services:
         - NO_PROXY
     environment:
       # 외부 주소 대신, 내부 네트워크의 서비스 이름 'master'를 사용합니다.
+      - AGENT_ALIAS=gpu6
       - MASTER_URL=http://master:8000
       - HTTP_PROXY
       - HTTPS_PROXY
@@ -57,6 +58,8 @@ services:
             - driver: nvidia
               count: all
               capabilities: [ gpu ]
+    ports:
+      - "8001:8001"
     depends_on:
       - master # master가 실행된 후에 agent_local 실행
     restart: always
