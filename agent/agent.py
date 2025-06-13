@@ -13,7 +13,7 @@ MASTER_URL = os.getenv("MASTER_URL", "http://localhost:8000")  # 환경 변수�
 
 
 def get_hostname():
-    return socket.gethostname()
+    return os.getenv("AGENT_HOST_NAME", socket.gethostname())
 
 
 def get_ip_address():
