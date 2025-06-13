@@ -15,7 +15,14 @@ services:
     build:
       context: .
       dockerfile: master/Dockerfile
-      network: host
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
+        - NO_PROXY
+    environment:
+      - HTTP_PROXY
+      - HTTPS_PROXY
+      - NO_PROXY
     volumes:
       - ./master:/usr/src/app
     ports:
