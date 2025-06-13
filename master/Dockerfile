@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 WORKDIR /usr/src/app
-SHELL ["~/.bash_profile", "-c"]
+CMD ["source", "/hanmail/.bash_profile"]
 RUN pip install uv
 COPY ./master/requirements.txt ./
 RUN uv pip install --system -r requirements.txt
