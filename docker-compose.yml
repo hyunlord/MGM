@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: master/Dockerfile
-      network: host
+      network_mode: host
     volumes:
       - ./master:/usr/src/app
     ports:
