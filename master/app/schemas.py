@@ -28,7 +28,7 @@ class GPUInfo(BaseModel):
     memory_total: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ServerInfo(BaseModel):
@@ -40,4 +40,4 @@ class ServerInfo(BaseModel):
     gpus: List[GPUInfo] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
