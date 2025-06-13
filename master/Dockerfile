@@ -11,11 +11,12 @@ ENV HTTPS_PROXY=$HTTPS_PROXY
 ENV NO_PROXY=$NO_PROXY
 
 WORKDIR /usr/src/app
-RUN pip install uv
+RUN pip install --proxy $HTTP_PROXY uv
 COPY ./master/requirements.txt ./
 
 # uv pip install 실행 시 프록시 설정을 사용하게 됨
 RUN uv pip install --system -r requirements.txt
+
 COPY ./master/ ./
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
