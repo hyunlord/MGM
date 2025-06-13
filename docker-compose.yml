@@ -49,14 +49,7 @@ services:
       - HTTP_PROXY
       - HTTPS_PROXY
       - NO_PROXY
-    # 컨테이너에 GPU를 할당하는 최신 방식
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [ gpu ]
+      - NVIDIA_VISIBLE_DEVICES=all
     depends_on:
       - master # master가 실행된 후에 agent_local 실행
     restart: always
