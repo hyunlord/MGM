@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+from datetime import datetime
+
 from . import models, schemas
 
 
@@ -39,6 +41,46 @@ def update_server_status(db: Session, status: schemas.ServerStatus):
     return server
 
 
-# get_all_servers 함수는 그대로 둡니다.
 def get_all_servers(db: Session):
     return db.query(models.Server).all()
+
+
+def create_experiment(db: Session, exp: schemas.ExperimentCreate, server_id: int):
+    db_exp = models.Experiment(
+        git_repo=exp.git_repo,
+        git_commit=exp.git_commit,
+        command=exp.command,
+        server_id=server_id
+    )
+    db.add(db_exp)
+    db.commit()
+    db.refresh(db_exp)
+    return db_exp
+
+
+def update_experiment_status(db: Session, exp_id: int, status: str):
+    db_exp = db.query(models.Experiment).filter(models.Experiment.id == exp_id).first()
+    if db_exp:
+        db_exp.status = status
+        if status == 'running':
+            db_exp.start_time = datetime.now()
+        elif status in ['completed', 'failed']:
+            db_exp.end_time = datetime.now()
+        db.commit()
+    return db_exp
+
+
+def append_log_to_experiment(db: Session, exp_id: int, log_content: str):
+    db_exp = db.query(models.Experiment).filter(models.Experiment.id == exp_id).first()
+    if db_exp:
+        db_exp.log += log_content
+        db.commit()
+    return db_exp
+
+
+def get_experiment(db: Session, exp_id: int):
+    return db.query(models.Experiment).filter(models.Experiment.id == exp_id).first()
+
+
+def get_all_experiments(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Experiment).offset(skip).limit(limit).all()
