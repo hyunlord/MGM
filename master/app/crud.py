@@ -5,8 +5,11 @@ from . import models, schemas
 
 
 def update_server_status(db: Session, status: schemas.ServerStatus):
-    # 1. 호스트 이름으로 서버를 찾거나, 없으면 새로 생성합니다.
-    server = db.query(models.Server).filter(models.Server.hostname == status.hostname).first()
+    # 만약 에이전트가 alias를 보내지 않았다면, 아무 작업도 하지 않고 종료
+    if not status.alias:
+        return None
+    # 서버를 hostname이 아닌, 우리가 부여한 고유한 alias로 찾습니다.
+    server = db.query(models.Server).filter(models.Server.alias == status.alias).first()
     if not server:
         server = models.Server(hostname=status.hostname)
         db.add(server)
@@ -14,13 +17,13 @@ def update_server_status(db: Session, status: schemas.ServerStatus):
         db.commit()
         db.refresh(server)
 
-    # 2. 서버의 기본 정보를 업데이트합니다.
+    # 서버의 기본 정보를 업데이트합니다.
     server.alias = status.alias
     server.ip_address = status.ip_address
     server.cpu_percent = status.cpu_percent
     server.memory_percent = status.memory_percent
 
-    # 3. GPU 정보를 "Upsert" 로직으로 업데이트합니다.
+    # GPU 정보를 "Upsert" 로직으로 업데이트합니다.
     for gpu_status in status.gpus:
         # 해당 UUID를 가진 GPU가 DB에 이미 있는지 찾습니다.
         gpu = db.query(models.GPU).filter(models.GPU.uuid == gpu_status.uuid).first()
