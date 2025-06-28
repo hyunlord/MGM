@@ -31,9 +31,9 @@ def read_root():
 @app.post("/api/experiments", response_model=schemas.ExperimentInfo)
 async def run_experiment(exp: schemas.ExperimentCreate, db: Session = Depends(get_db)):
     """새로운 실험(작업)을 생성하고 에이전트에게 전달합니다."""
-    target_server = db.query(models.Server).filter(models.Server.hostname == exp.server_hostname).first()
+    target_server = db.query(models.Server).filter(models.Server.alias == exp.server_alias).first()
     if not target_server:
-        raise HTTPException(status_code=404, detail="Server not found")
+        raise HTTPException(status_code=404, detail=f"Server with alias '{exp.server_alias}' not found")
 
     # 1. DB에 Experiment 기록 생성
     db_exp = crud.create_experiment(db=db, exp=exp, server_id=target_server.id)

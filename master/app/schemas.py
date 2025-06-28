@@ -52,7 +52,7 @@ class ExperimentCreate(BaseModel):
     git_repo: Optional[str] = None
     git_commit: Optional[str] = None
     command: str
-    server_hostname: str # 어느 서버에서 실행할지 지정
+    server_alias: str # 어느 서버에서 실행할지 지정
 
 
 # Agent -> Master 로 로그를 보낼 때의 데이터 형태
