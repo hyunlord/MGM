@@ -4,10 +4,13 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend/servers.json:/app/servers.json
 
   frontend:
-    build: ./frontend
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app         # 로컬 소스와 동기화
+      - /app/node_modules       # 의존성만 컨테이너에 설치
     ports:
-      - "3000:3000"
+      - "3000:3000"             # CRA 개발 서버
+    command: sh -c "npm install && npm start"

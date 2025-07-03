@@ -1,21 +1,23 @@
-# backend/app/main.py
-from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel
+import threading
+import webbrowser
 from typing import List, Optional
+from pydantic import BaseModel
+
+from fastapi import FastAPI, HTTPException, Query
+from starlette.staticfiles import StaticFiles
+
 from app.ssh_manager import discover_servers, ssh_mgr
 
 app = FastAPI(title="Remote MLOps UI Backend")
-app.mount(
-    "/",
-    StaticFiles(directory="static", html=True),
-    name="static"
-)
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
 
 class ConnectRequest(BaseModel):
     host: str
     user: str
     key_path: Optional[str] = None
     password: Optional[str] = None
+
 
 @app.get("/servers/discover", response_model=List[str])
 async def api_discover(
@@ -28,6 +30,7 @@ async def api_discover(
         return discover_servers(subnet, port, timeout, max_workers)
     except Exception as e:
         raise HTTPException(500, f"Discovery error: {e}")
+
 
 @app.post("/servers/connect")
 async def api_connect(req: ConnectRequest):
@@ -42,7 +45,6 @@ async def api_connect(req: ConnectRequest):
     except Exception as e:
         raise HTTPException(500, f"SSH connect failed: {e}")
 
-import threading, webbrowser
 
 def _open_browser():
     webbrowser.open("http://localhost:8000")

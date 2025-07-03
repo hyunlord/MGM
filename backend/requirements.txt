@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+paramiko
+psutil
+pynvml
+pydantic
+python-dotenv

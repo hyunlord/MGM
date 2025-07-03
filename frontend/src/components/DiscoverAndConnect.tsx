@@ -1,4 +1,3 @@
-// frontend/src/components/DiscoverAndConnect.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -9,7 +8,7 @@ export function DiscoverAndConnect() {
 
   // 수동 입력용 state
   const [manualHost, setManualHost] = useState('');
-  const [user, setUser] = useState('user');
+  const [user, setUser] = useState('hanadmin');
   const [keyPath, setKeyPath] = useState('~/.ssh/id_rsa');
   const [password, setPassword] = useState('');
 
