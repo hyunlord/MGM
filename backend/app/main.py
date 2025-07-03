@@ -5,6 +5,11 @@ from typing import List, Optional
 from app.ssh_manager import discover_servers, ssh_mgr
 
 app = FastAPI(title="Remote MLOps UI Backend")
+app.mount(
+    "/",
+    StaticFiles(directory="static", html=True),
+    name="static"
+)
 
 class ConnectRequest(BaseModel):
     host: str
@@ -36,3 +41,13 @@ async def api_connect(req: ConnectRequest):
         return {"status": "connected", "host": req.host}
     except Exception as e:
         raise HTTPException(500, f"SSH connect failed: {e}")
+
+import threading, webbrowser
+
+def _open_browser():
+    webbrowser.open("http://localhost:8000")
+
+if __name__ == "__main__":
+    threading.Timer(1.0, _open_browser).start()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
