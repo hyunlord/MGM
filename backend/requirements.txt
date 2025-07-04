@@ -5,3 +5,7 @@ psutil
 pynvml
 pydantic
 python-dotenv
+gssapi
+pyasn1
+ujson
+sqlalchemy

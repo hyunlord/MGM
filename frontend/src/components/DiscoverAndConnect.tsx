@@ -1,88 +1,123 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-export function DiscoverAndConnect() {
-  const [subnet, setSubnet] = useState('192.168.1.0/24');
-  const [hosts, setHosts] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+interface DiscoverAndConnectProps {
+  onConnect: (host: string) => void;
+}
+export function DiscoverAndConnect({ onConnect }: DiscoverAndConnectProps) {
+  // 연결된 서버 리스트
+  const [connectedServers, setConnectedServers] = useState<string[]>([]);
 
   // 수동 입력용 state
-  const [manualHost, setManualHost] = useState('');
-  const [user, setUser] = useState('hanadmin');
-  const [keyPath, setKeyPath] = useState('~/.ssh/id_rsa');
+  const [host, setHost] = useState('');
+  const [sshUser, setSshUser] = useState('hanadmin');
+  const [principal, setPrincipal] = useState('');
+  const [kinitPassword, setKinitPassword] = useState('');
   const [password, setPassword] = useState('');
+  const [connecting, setConnecting] = useState(false);
 
-  // 1) 서버 스캔
-  const discover = async () => {
-    setLoading(true);
+  // SSH 연결 요청
+  const connect = async () => {
+    if (!host) return;
+    setConnecting(true);
     try {
-      const res = await axios.get<string[]>('/servers/discover', { params: { subnet } });
-      setHosts(res.data);
+      await axios.post('/api/servers/connect', {
+        host,
+        ssh_user: sshUser,
+        principal: principal || undefined,
+        kinit_password: kinitPassword || undefined,
+        password: password || undefined
+      });
+      onConnect(host);
+      setHost('');
+      setPassword('');
+      setKinitPassword('');
     } catch (e) {
-      alert('Discovery failed: ' + e);
+      alert(`Connect failed (${host}): ${e}`);
     } finally {
-      setLoading(false);
-    }
-  };
-
-  // 2) SSH 연결 요청
-  const connect = async (host: string) => {
-    try {
-      await axios.post('/servers/connect', { host, user, key_path: keyPath, password });
-      alert(`Connected to ${host}`);
-    } catch (e) {
-      alert(`Connect failed (${host}): ` + e);
+      setConnecting(false);
     }
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>1. 서버 자동 스캔</h2>
-      <input
-        value={subnet}
-        onChange={e => setSubnet(e.target.value)}
-        style={{ width: 200 }}
-      />
-      <button onClick={discover} disabled={loading}>
-        {loading ? 'Scanning…' : 'Discover'}
-      </button>
+    <div style={{ maxWidth: 600, margin: '40px auto', fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: 20 }}>Remote MLOps UI</h1>
 
-      <h3>발견된 호스트</h3>
-      <ul>
-        {hosts.map(h => (
-          <li key={h}>
-            {h}{' '}
-            <button onClick={() => connect(h)}>Connect</button>
-          </li>
-        ))}
-      </ul>
+      {/* 연결된 서버 목록 */}
+      <div style={{ marginBottom: 30 }}>
+        <h2>Connected Servers</h2>
+        {connectedServers.length === 0 ? (
+          <p style={{ color: '#777' }}>No servers connected.</p>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {connectedServers.map(s => (
+              <li key={s} style={{ padding: '8px 12px', background: '#f5f5f5', marginBottom: 8, borderRadius: 4 }}>
+                {s}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
-      <h2>2. 수동 입력</h2>
-      <div>
-        <label>
-          Host:&nbsp;
-          <input value={manualHost} onChange={e => setManualHost(e.target.value)} />
-        </label>
+      {/* 수동 연결 섹션 */}
+      <div style={{ padding: 20, border: '1px solid #ddd', borderRadius: 6, background: '#fafafa' }}>
+        <h2 style={{ marginBottom: 16 }}>Connect to Server</h2>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Host</label>
+          <input
+            value={host}
+            onChange={e => setHost(e.target.value)}
+            placeholder="hostname or IP"
+            style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+          />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>SSH User</label>
+          <input
+            value={sshUser}
+            onChange={e => setSshUser(e.target.value)}
+            style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+          />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Principal (Kerberos)</label>
+          <input
+            value={principal}
+            onChange={e => setPrincipal(e.target.value)}
+            placeholder="e.g. rexxa.som@KAKAO.COM"
+            style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+          />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>kinit Password</label>
+          <input
+            type="password"
+            value={kinitPassword}
+            onChange={e => setKinitPassword(e.target.value)}
+            style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+          />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Password (SSH)</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+          />
+        </div>
+        <button
+          onClick={connect}
+          disabled={connecting || !host}
+          style={{
+            width: '100%', padding: 12, borderRadius: 4,
+            border: 'none', background: connecting ? '#999' : '#007bff',
+            color: '#fff', fontSize: 16, cursor: connecting ? 'default' : 'pointer'
+          }}
+        >
+          {connecting ? 'Connecting…' : 'Connect'}
+        </button>
       </div>
-      <div>
-        <label>
-          User:&nbsp;
-          <input value={user} onChange={e => setUser(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Key Path:&nbsp;
-          <input value={keyPath} onChange={e => setKeyPath(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Password (옵션):&nbsp;
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-        </label>
-      </div>
-      <button onClick={() => connect(manualHost)}>Manual Connect</button>
     </div>
   );
 }
